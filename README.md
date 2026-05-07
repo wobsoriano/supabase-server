@@ -499,6 +499,7 @@ No. `@supabase/ssr` handles cookie-based session management for frameworks like 
 | Which framework adapters exist? How do I contribute one?            | [`src/adapters/README.md`](src/adapters/README.md)               |
 | How do I use this with Hono?                                        | [`docs/adapters/hono.md`](docs/adapters/hono.md)                 |
 | How do I use this with H3 / Nuxt?                                   | [`docs/adapters/h3.md`](docs/adapters/h3.md)                     |
+| How do I use this with Elysia ?                                     | [`docs/adapters/elysia.md`](docs/adapters/elysia.md)             |
 | How do I use low-level primitives for custom flows?                 | [`docs/core-primitives.md`](docs/core-primitives.md)             |
 | How do environment variables work across runtimes?                  | [`docs/environment-variables.md`](docs/environment-variables.md) |
 | How do I handle errors? What codes exist?                           | [`docs/error-handling.md`](docs/error-handling.md)               |
