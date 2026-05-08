@@ -262,12 +262,13 @@ withSupabase(
 
 ## Framework Adapters
 
-Adapters wrap `withSupabase` for a specific framework's middleware contract. **All adapters are community-maintained** — both Hono and H3 originated as community contributions. They live in this repo and ship with the core package, so a single `npm install @supabase/server` covers the framework you're using. See [`src/adapters/README.md`](src/adapters/README.md) for the maintenance model and the requirements for contributing a new adapter.
+Adapters wrap `withSupabase` for a specific framework's middleware contract. **All adapters are community-maintained** — Hono, H3, and Elysia all originated as community contributions. They live in this repo and ship with the core package, so a single `npm install @supabase/server` covers the framework you're using. See [`src/adapters/README.md`](src/adapters/README.md) for the maintenance model and the requirements for contributing a new adapter.
 
-| Framework | Import                           | Framework version | Docs                                           |
-| --------- | -------------------------------- | ----------------- | ---------------------------------------------- |
-| Hono      | `@supabase/server/adapters/hono` | `^4.0.0`          | [docs/adapters/hono.md](docs/adapters/hono.md) |
-| H3 / Nuxt | `@supabase/server/adapters/h3`   | `^2.0.0`          | [docs/adapters/h3.md](docs/adapters/h3.md)     |
+| Framework | Import                             | Framework version | Docs                                               |
+| --------- | ---------------------------------- | ----------------- | -------------------------------------------------- |
+| Hono      | `@supabase/server/adapters/hono`   | `^4.0.0`          | [docs/adapters/hono.md](docs/adapters/hono.md)     |
+| H3 / Nuxt | `@supabase/server/adapters/h3`     | `^2.0.0`          | [docs/adapters/h3.md](docs/adapters/h3.md)         |
+| Elysia    | `@supabase/server/adapters/elysia` | `^1.4.0`          | [docs/adapters/elysia.md](docs/adapters/elysia.md) |
 
 ### Hono
 
@@ -305,7 +306,7 @@ import { withSupabase } from '@supabase/server/adapters/elysia'
 
 const app = new Elysia()
   // Protected — plugin resolves supabaseContext before handlers run
-  .use(withSupabase({ allow: 'user' }))
+  .use(withSupabase({ auth: 'user' }))
   .get('/games', async ({ supabaseContext }) => {
     const { data: myGames } = await supabaseContext.supabase
       .from('favorite_games')
@@ -328,7 +329,7 @@ const app = new Elysia()
   .get('/health', () => ({ status: 'ok' }))
   .group('/api', (app) =>
     app
-      .use(withSupabase({ allow: 'user' }))
+      .use(withSupabase({ auth: 'user' }))
       .get('/profile', async ({ supabaseContext }) => {
         return supabaseContext.userClaims
       }),

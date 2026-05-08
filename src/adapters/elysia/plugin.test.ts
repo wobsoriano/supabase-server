@@ -13,9 +13,9 @@ describe('elysia supabase plugin', () => {
 
   it('sets supabase context on successful auth', async () => {
     const app = new Elysia()
-      .use(withSupabase({ allow: 'always', env }))
+      .use(withSupabase({ auth: 'none', env }))
       .get('/', ({ supabaseContext }) => ({
-        authType: supabaseContext.authType,
+        authMode: supabaseContext.authMode,
         hasSupabase: !!supabaseContext.supabase,
         hasAdmin: !!supabaseContext.supabaseAdmin,
       }))
@@ -23,14 +23,14 @@ describe('elysia supabase plugin', () => {
     const res = await app.handle(new Request('http://localhost/'))
     expect(res.status).toBe(200)
     const body = await res.json()
-    expect(body.authType).toBe('always')
+    expect(body.authMode).toBe('none')
     expect(body.hasSupabase).toBe(true)
     expect(body.hasAdmin).toBe(true)
   })
 
   it('throws error on auth failure', async () => {
     const app = new Elysia()
-      .use(withSupabase({ allow: 'user', env }))
+      .use(withSupabase({ auth: 'user', env }))
       .get('/', () => ({ ok: true }))
 
     const res = await app.handle(new Request('http://localhost/'))
@@ -41,7 +41,7 @@ describe('elysia supabase plugin', () => {
 
   it('exposes AuthError via cause in onError', async () => {
     const app = new Elysia()
-      .use(withSupabase({ allow: 'user', env }))
+      .use(withSupabase({ auth: 'user', env }))
       .onError(({ code, error, status }) => {
         if (code !== 'SupabaseAuthError') return
         const cause = error.cause as
@@ -63,25 +63,25 @@ describe('elysia supabase plugin', () => {
 
   it('skips if context is already set by prior plugin', async () => {
     const app = new Elysia()
-      // First plugin sets context with 'always' auth
-      .use(withSupabase({ allow: 'always', env }))
+      // First plugin sets context with 'none' auth
+      .use(withSupabase({ auth: 'none', env }))
       // Second plugin would require 'secret' — but should skip
-      .use(withSupabase({ allow: 'secret', env }))
+      .use(withSupabase({ auth: 'secret', env }))
       .get('/', ({ supabaseContext }) => ({
-        authType: supabaseContext.authType,
+        authMode: supabaseContext.authMode,
       }))
 
     // No apikey header — would fail 'secret' if it ran
     const res = await app.handle(new Request('http://localhost/'))
     expect(res.status).toBe(200)
     const body = await res.json()
-    // First plugin's auth type is preserved
-    expect(body.authType).toBe('always')
+    // First plugin's auth mode is preserved
+    expect(body.authMode).toBe('none')
   })
 
   it('does not add CORS headers', async () => {
     const app = new Elysia()
-      .use(withSupabase({ allow: 'always', env }))
+      .use(withSupabase({ auth: 'none', env }))
       .get('/', () => ({ ok: true }))
 
     const res = await app.handle(new Request('http://localhost/'))

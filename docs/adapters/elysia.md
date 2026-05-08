@@ -17,7 +17,7 @@ import { Elysia } from 'elysia'
 import { withSupabase } from '@supabase/server/adapters/elysia'
 
 const app = new Elysia()
-  .use(withSupabase({ allow: 'user' }))
+  .use(withSupabase({ auth: 'user' }))
   .get('/todos', async ({ supabaseContext }) => {
     const { data } = await supabaseContext.supabase.from('todos').select()
     return data
@@ -26,7 +26,7 @@ const app = new Elysia()
 app.listen(3000)
 ```
 
-The context is available as `supabaseContext` in your route handlers and contains the same `SupabaseContext` fields as the main `withSupabase` wrapper: `supabase`, `supabaseAdmin`, `userClaims`, `claims`, and `authType`.
+The context is available as `supabaseContext` in your route handlers and contains the same `SupabaseContext` fields as the main `withSupabase` wrapper: `supabase`, `supabaseAdmin`, `userClaims`, `jwtClaims`, and `authMode`.
 
 ## Per-route auth
 
@@ -42,7 +42,7 @@ const app = new Elysia()
   // User-authenticated routes
   .group('/api', (app) =>
     app
-      .use(withSupabase({ allow: 'user' }))
+      .use(withSupabase({ auth: 'user' }))
       .get('/todos', async ({ supabaseContext }) => {
         const { data } = await supabaseContext.supabase.from('todos').select()
         return data
@@ -51,7 +51,7 @@ const app = new Elysia()
   // Secret-key-protected admin routes
   .group('/admin', (app) =>
     app
-      .use(withSupabase({ allow: 'secret' }))
+      .use(withSupabase({ auth: 'secret' }))
       .post('/sync', async ({ supabaseContext }) => {
         const { data } = await supabaseContext.supabaseAdmin
           .from('audit_log')
@@ -82,7 +82,7 @@ import { withSupabase } from '@supabase/server/adapters/elysia'
 
 const app = new Elysia()
   .use(cors())
-  .use(withSupabase({ allow: 'user' }))
+  .use(withSupabase({ auth: 'user' }))
   .get('/todos', async ({ supabaseContext }) => {
     const { data } = await supabaseContext.supabase.from('todos').select()
     return data
@@ -100,7 +100,7 @@ import { Elysia } from 'elysia'
 import { withSupabase } from '@supabase/server/adapters/elysia'
 
 const app = new Elysia()
-  .use(withSupabase({ allow: 'user' }))
+  .use(withSupabase({ auth: 'user' }))
   .onError(({ code, error, status }) => {
     if (code !== 'SupabaseAuthError') return
     const cause = error.cause as { code?: string; status?: number } | undefined
@@ -124,7 +124,7 @@ Without a custom `onError`, Elysia uses the `status` property on the thrown erro
 Pass `env` to override auto-detected environment variables, same as the main wrapper:
 
 ```ts
-app.use(withSupabase({ allow: 'user', env: { url: 'http://localhost:54321' } }))
+app.use(withSupabase({ auth: 'user', env: { url: 'http://localhost:54321' } }))
 ```
 
 ## Supabase client options
@@ -134,7 +134,7 @@ Forward options to the underlying `createClient()` calls:
 ```ts
 app.use(
   withSupabase({
-    allow: 'user',
+    auth: 'user',
     supabaseOptions: { db: { schema: 'api' } },
   }),
 )

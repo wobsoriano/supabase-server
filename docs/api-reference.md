@@ -146,7 +146,7 @@ H3 middleware. Sets `event.context.supabaseContext` on the H3 event. Throws `HTT
 
 Skips if `event.context.supabaseContext` is already set (enables chained middleware).
 
-Defaults to `allow: 'user'` when config is omitted.
+Defaults to `auth: 'user'` when config is omitted.
 
 ---
 
@@ -162,7 +162,7 @@ Elysia plugin that resolves `supabaseContext` into the request context. Throws a
 
 Skips if `supabaseContext` is already resolved by a prior plugin.
 
-Defaults to `allow: 'user'` when config is omitted.
+Defaults to `auth: 'user'` when config is omitted.
 
 ---
 
