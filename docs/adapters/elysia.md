@@ -93,7 +93,7 @@ app.listen(3000)
 
 ## Error handling
 
-When auth fails, the plugin throws an error with the correct HTTP status code set. The original `AuthError` is available via `error.cause` in an `onError` handler:
+When auth fails, the plugin throws a `SupabaseError`. The HTTP status is on `.status` directly, and the original `AuthError` is available as the typed `.cause`. Discriminate in `onError` via `code === 'SupabaseError'`:
 
 ```ts
 import { Elysia } from 'elysia'
@@ -103,10 +103,9 @@ const app = new Elysia()
   .use(withSupabase({ auth: 'user' }))
   .onError(({ code, error, status }) => {
     if (code !== 'SupabaseError') return
-    const cause = error.cause as { code?: string; status?: number } | undefined
-    return status((cause?.status as 401) ?? 500, {
+    return status(error.status as 401, {
       error: error.message,
-      code: cause?.code,
+      code: error.cause.code,
     })
   })
   .get('/todos', async ({ supabaseContext }) => {
@@ -117,7 +116,7 @@ const app = new Elysia()
 app.listen(3000)
 ```
 
-Without a custom `onError`, Elysia uses the `status` property on the thrown error to set the response status automatically (401 for auth failures, 500 for internal errors).
+Without a custom `onError`, Elysia uses the `status` property on the thrown `SupabaseError` to set the response status automatically (401 for auth failures, 500 for internal errors).
 
 ## Environment overrides
 

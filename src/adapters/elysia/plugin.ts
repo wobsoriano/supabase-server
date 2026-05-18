@@ -1,13 +1,15 @@
 import { Elysia } from 'elysia'
 
 import { createSupabaseContext } from '../../create-supabase-context.js'
+import type { AuthError } from '../../errors.js'
 import type { SupabaseContext, WithSupabaseConfig } from '../../types.js'
 
 class SupabaseError extends Error {
   status: number
-  constructor(message: string, status: number, cause: unknown) {
-    super(message, { cause })
-    this.status = status
+  declare cause: AuthError
+  constructor(inner: AuthError) {
+    super(inner.message, { cause: inner })
+    this.status = inner.status
   }
 }
 
@@ -15,8 +17,8 @@ class SupabaseError extends Error {
  * Elysia plugin that creates a {@link SupabaseContext} and makes it available in route handlers.
  *
  * Skips if a previous plugin already set the context, enabling route-level overrides.
- * Throws an error with the correct HTTP status on auth failure. The original `AuthError` is
- * available via `error.cause` in an `onError` handler.
+ * Throws a `SupabaseError` on auth failure. `.status` is on the error directly; the original
+ * `AuthError` is available as the typed `.cause`. Discriminate in `onError` via `code === 'SupabaseError'`.
  *
  * @param config - Auth modes and optional environment overrides. CORS is excluded — use Elysia's CORS utilities.
  * @returns An Elysia plugin that exposes `supabaseContext`.
@@ -63,9 +65,7 @@ export function withSupabase(config?: Omit<WithSupabaseConfig, 'cors'>) {
       if (existing) return { supabaseContext: existing }
 
       const { data, error } = await createSupabaseContext(ctx.request, config)
-      if (error) {
-        throw new SupabaseError(error.message, error.status, error)
-      }
+      if (error) throw new SupabaseError(error)
 
       return { supabaseContext: data }
     })

@@ -39,17 +39,14 @@ describe('elysia supabase plugin', () => {
     expect(body).toBeTruthy()
   })
 
-  it('exposes AuthError via cause in onError', async () => {
+  it('exposes SupabaseError in onError', async () => {
     const app = new Elysia()
       .use(withSupabase({ auth: 'user', env }))
       .onError(({ code, error, status }) => {
         if (code !== 'SupabaseError') return
-        const cause = error.cause as
-          | { code?: string; status?: number }
-          | undefined
-        return status((cause?.status as 401) ?? 500, {
+        return status(error.status as 401, {
           error: error.message,
-          code: cause?.code,
+          code: error.cause.code,
         })
       })
       .get('/', () => ({ ok: true }))
